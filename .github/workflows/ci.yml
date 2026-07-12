@@ -30,16 +30,19 @@ jobs:
       - name: Test rle
         env:
           CTP_JUNIT: ${{ github.workspace }}/rle-junit.xml
+          CTP_SUITE: rle
         run: make -C compression/rle test
 
       - name: Test huffman
         env:
           CTP_JUNIT: ${{ github.workspace }}/huffman-junit.xml
+          CTP_SUITE: huffman
         run: make -C compression/huffman test
 
       - name: Test shannon-fano
         env:
           CTP_JUNIT: ${{ github.workspace }}/shannon-fano-junit.xml
+          CTP_SUITE: shannon-fano
         run: make -C compression/shannon-fano test
 
       - name: Upload JUnit XML
@@ -49,26 +52,12 @@ jobs:
           name: junit-xml
           path: "*-junit.xml"
 
-      - name: Publish rle test results
+      - name: Publish test results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          files: "rle-junit.xml"
-          check_name: "rle tests"
-
-      - name: Publish huffman test results
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          files: "huffman-junit.xml"
-          check_name: "huffman tests"
-
-      - name: Publish shannon-fano test results
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          files: "shannon-fano-junit.xml"
-          check_name: "shannon-fano tests"
+          files: "*-junit.xml"
+          check_name: "Test Results"
 
   sanitize:
     runs-on: ubuntu-latest
