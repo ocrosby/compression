@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out compression
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: compression
 
       - name: Check out ctestprobe (sibling checkout)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ocrosby/ctestprobe
           path: ctestprobe
@@ -39,12 +39,12 @@ jobs:
       SAN_CFLAGS: "-std=c11 -Wall -Wextra -Wpedantic -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
     steps:
       - name: Check out compression
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: compression
 
       - name: Check out ctestprobe (sibling checkout)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ocrosby/ctestprobe
           path: ctestprobe
