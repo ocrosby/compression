@@ -1,0 +1,36 @@
+# Build artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+obj/
+build/
+bin/
+
+# Debug / core files
+*.dSYM/
+*.stackdump
+core
+vgcore.*
+
+# Editor / tooling
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+compile_commands.json
+.cache/
+
+# Coverage
+*.gcno
+*.gcda
+*.gcov
+
+# Project-local task tracking
+TODO.md
