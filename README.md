@@ -33,6 +33,15 @@ None are implemented yet — this README documents the intended shape.
 
 ## Building an experiment
 
+Requires [ctestprobe](https://github.com/ocrosby/ctestprobe) cloned as a
+sibling of this repo (`../ctestprobe` from the repo root):
+
+```sh
+git clone https://github.com/ocrosby/ctestprobe.git ../ctestprobe
+```
+
+Then:
+
 ```sh
 cd rle
 make
