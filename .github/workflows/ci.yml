@@ -32,3 +32,31 @@ jobs:
 
       - name: Test shannon-fano
         run: make -C compression/shannon-fano test
+
+  sanitize:
+    runs-on: ubuntu-latest
+    env:
+      SAN_CFLAGS: "-std=c11 -Wall -Wextra -Wpedantic -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+    steps:
+      - name: Check out compression
+        uses: actions/checkout@v4
+        with:
+          path: compression
+
+      - name: Check out ctestprobe (sibling checkout)
+        uses: actions/checkout@v4
+        with:
+          repository: ocrosby/ctestprobe
+          path: ctestprobe
+
+      - name: Build ctestprobe under sanitizers
+        run: make -C ctestprobe lib CFLAGS="${{ env.SAN_CFLAGS }}"
+
+      - name: Test rle under sanitizers
+        run: make -C compression/rle test CFLAGS="${{ env.SAN_CFLAGS }}"
+
+      - name: Test huffman under sanitizers
+        run: make -C compression/huffman test CFLAGS="${{ env.SAN_CFLAGS }}"
+
+      - name: Test shannon-fano under sanitizers
+        run: make -C compression/shannon-fano test CFLAGS="${{ env.SAN_CFLAGS }}"
