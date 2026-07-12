@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  CTESTPROBE_VERSION: v2.2.0
+  CTESTPROBE_VERSION: v2.3.0
 
 jobs:
   test:
