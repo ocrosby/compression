@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
     steps:
       - name: Check out compression
         uses: actions/checkout@v5
@@ -25,13 +28,33 @@ jobs:
         run: make -C ctestprobe lib
 
       - name: Test rle
+        env:
+          CTP_JUNIT: ${{ github.workspace }}/rle-junit.xml
         run: make -C compression/rle test
 
       - name: Test huffman
+        env:
+          CTP_JUNIT: ${{ github.workspace }}/huffman-junit.xml
         run: make -C compression/huffman test
 
       - name: Test shannon-fano
+        env:
+          CTP_JUNIT: ${{ github.workspace }}/shannon-fano-junit.xml
         run: make -C compression/shannon-fano test
+
+      - name: Upload JUnit XML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-xml
+          path: "*-junit.xml"
+
+      - name: Publish test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "*-junit.xml"
+          check_name: "Test Results"
 
   sanitize:
     runs-on: ubuntu-latest
