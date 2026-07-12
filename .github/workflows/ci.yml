@@ -58,10 +58,11 @@ jobs:
 
       - name: Publish test results
         if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: jedi-knights/publish-test-results@main
         with:
           files: "*-junit.xml"
-          check_name: "Test Results"
+          check-name: "Test Results"
+          source-root: compression
 
   sanitize:
     runs-on: ubuntu-latest
