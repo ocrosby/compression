@@ -49,12 +49,26 @@ jobs:
           name: junit-xml
           path: "*-junit.xml"
 
-      - name: Publish test results
+      - name: Publish rle test results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          files: "*-junit.xml"
-          check_name: "Test Results"
+          files: "rle-junit.xml"
+          check_name: "rle tests"
+
+      - name: Publish huffman test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "huffman-junit.xml"
+          check_name: "huffman tests"
+
+      - name: Publish shannon-fano test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "shannon-fano-junit.xml"
+          check_name: "shannon-fano tests"
 
   sanitize:
     runs-on: ubuntu-latest
