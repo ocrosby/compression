@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out compression
+        uses: actions/checkout@v4
+        with:
+          path: compression
+
+      - name: Check out ctestprobe (sibling checkout)
+        uses: actions/checkout@v4
+        with:
+          repository: ocrosby/ctestprobe
+          path: ctestprobe
+
+      - name: Build ctestprobe
+        run: make -C ctestprobe lib
+
+      - name: Test rle
+        run: make -C compression/rle test
+
+      - name: Test huffman
+        run: make -C compression/huffman test
+
+      - name: Test shannon-fano
+        run: make -C compression/shannon-fano test
