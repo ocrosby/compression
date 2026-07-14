@@ -44,7 +44,10 @@ belong under `docs/` instead.
 - Each algorithm directory is self-contained *between algorithms* — no
   shared headers between `rle/`, `huffman/`, etc. Duplicating a small
   helper between them is preferred over factoring one into a `common/`
-  directory until three consumers exist.
+  directory until three consumers exist. `common/` currently hosts the
+  8-byte length header (`hdr.h`) and the MSB-first bit stream
+  (`bitstream.h`); anything shared by only two algorithms stays
+  duplicated.
 - Tests use [ctestprobe](https://github.com/ocrosby/ctestprobe) linked
   from a sibling checkout at `../ctestprobe`. Each test function is
   `static void`, uses `CTP_ASSERT` / `CTP_ASSERT_EQ_INT` /
@@ -63,5 +66,5 @@ Then each experiment builds in isolation:
     cd <algorithm>
     make test
 
-The algorithm's Makefile invokes ctestprobe's `lib` target via sub-make
-if `libctestprobe.a` isn't built yet.
+The algorithm's Makefile invokes both ctestprobe's and `common/`'s `lib`
+targets via sub-make if their static libraries aren't built yet.

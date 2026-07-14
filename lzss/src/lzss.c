@@ -2,7 +2,9 @@
 
 #include <string.h>
 
-#define LZSS_HDR_BYTES   8u
+#include "hdr.h"
+
+#define LZSS_HDR_BYTES   COMPRESSION_HDR_BYTES
 
 #define LZSS_WINDOW_BITS 12
 #define LZSS_WINDOW_SIZE (1u << LZSS_WINDOW_BITS)   /* 4096 */
@@ -32,9 +34,7 @@ size_t lzss_encode(const uint8_t *in, size_t in_len,
     if (in_len == 0) return 0;
     if (out_cap < LZSS_HDR_BYTES) return LZSS_ERROR;
 
-    for (size_t i = 0; i < 8; i++) {
-        out[i] = (uint8_t)((in_len >> (i * 8)) & 0xFFu);
-    }
+    hdr_write_len(out, in_len);
 
     uint32_t head[LZSS_HASH_SIZE];
     uint32_t prev[LZSS_WINDOW_SIZE];
@@ -135,8 +135,7 @@ size_t lzss_decode(const uint8_t *in, size_t in_len,
     if (in_len == 0) return 0;
     if (in_len < LZSS_HDR_BYTES) return LZSS_ERROR;
 
-    size_t orig_len = 0;
-    for (size_t i = 0; i < 8; i++) orig_len |= (size_t)in[i] << (i * 8);
+    size_t orig_len = hdr_read_len(in);
     if (orig_len > out_cap) return LZSS_ERROR;
     if (orig_len == 0) return 0;
 
