@@ -58,7 +58,7 @@ jobs:
 
       - name: Publish test results
         if: always()
-        uses: jedi-knights/publish-test-results@main
+        uses: jedi-knights/publish-test-results@9e36559492dd31d738c7743098592adb6bfabe83 # v0.3.0
         with:
           files: "*-junit.xml"
           check-name: "Test Results"
