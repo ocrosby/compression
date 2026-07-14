@@ -49,6 +49,12 @@ jobs:
           CTP_SUITE: shannon-fano
         run: make -C compression/shannon-fano test
 
+      - name: Test lzw
+        env:
+          CTP_JUNIT: ${{ github.workspace }}/lzw-junit.xml
+          CTP_SUITE: lzw
+        run: make -C compression/lzw test
+
       - name: Upload JUnit XML
         if: always()
         uses: actions/upload-artifact@v7
@@ -92,3 +98,6 @@ jobs:
 
       - name: Test shannon-fano under sanitizers
         run: make -C compression/shannon-fano test CFLAGS="${{ env.SAN_CFLAGS }}"
+
+      - name: Test lzw under sanitizers
+        run: make -C compression/lzw test CFLAGS="${{ env.SAN_CFLAGS }}"

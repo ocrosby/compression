@@ -47,8 +47,10 @@ compression/
   bit stream
 - **`shannon-fano/`** — Fano's top-down split variant sharing the wire
   format with `huffman/` via canonical code reassignment
+- **`lzw/`** — basic Lempel-Ziv-Welch with fixed 12-bit codes and an
+  implicit dictionary grown in lock-step by encoder and decoder
 - Byte-pinned tests where the wire format is deterministic (RLE); round-
-  trip tests where it isn't (Huffman, Shannon–Fano)
+  trip tests where it isn't (Huffman, Shannon–Fano, LZW)
 - Shared test harness via [ctestprobe](https://github.com/ocrosby/ctestprobe)
   from a sibling checkout — no vendored dependency, no submodule
 - CI runs each algorithm's suite with `-Wall -Wextra -Wpedantic`, plus a
@@ -132,7 +134,7 @@ export CFLAGS="-std=c11 -Wall -Wextra -Wpedantic -O1 -g \
   -fno-omit-frame-pointer"
 
 make -C ctestprobe clean lib
-for d in rle huffman shannon-fano; do
+for d in rle huffman shannon-fano lzw; do
   make -C compression/$d clean test
 done
 ```
@@ -143,13 +145,12 @@ and PR to `main` — see
 
 ## Roadmap
 
-Implemented: **rle**, **huffman**, **shannon-fano**.
+Implemented: **rle**, **huffman**, **shannon-fano**, **lzw**.
 
 Planned:
 
 - **lz77** — sliding-window dictionary coding
 - **lz78** — explicit-dictionary variant
-- **lzw** — LZ78 + implicit dictionary (as used in GIF and `compress(1)`)
 - **arithmetic** — arithmetic coding
 - **bwt** — Burrows–Wheeler transform + move-to-front + entropy stage
 
