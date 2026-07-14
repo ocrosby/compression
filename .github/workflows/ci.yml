@@ -55,6 +55,12 @@ jobs:
           CTP_SUITE: lzw
         run: make -C compression/lzw test
 
+      - name: Test lzss
+        env:
+          CTP_JUNIT: ${{ github.workspace }}/lzss-junit.xml
+          CTP_SUITE: lzss
+        run: make -C compression/lzss test
+
       - name: Upload JUnit XML
         if: always()
         uses: actions/upload-artifact@v7
@@ -101,3 +107,6 @@ jobs:
 
       - name: Test lzw under sanitizers
         run: make -C compression/lzw test CFLAGS="${{ env.SAN_CFLAGS }}"
+
+      - name: Test lzss under sanitizers
+        run: make -C compression/lzss test CFLAGS="${{ env.SAN_CFLAGS }}"
