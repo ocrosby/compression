@@ -49,8 +49,10 @@ compression/
   format with `huffman/` via canonical code reassignment
 - **`lzw/`** — basic Lempel-Ziv-Welch with fixed 12-bit codes and an
   implicit dictionary grown in lock-step by encoder and decoder
+- **`lzss/`** — sliding-window Lempel-Ziv-Storer-Szymanski with 4096-byte
+  window, 18-byte max match, and a flag-byte-per-8-tokens frame
 - Byte-pinned tests where the wire format is deterministic (RLE); round-
-  trip tests where it isn't (Huffman, Shannon–Fano, LZW)
+  trip tests where it isn't (Huffman, Shannon–Fano, LZW, LZSS)
 - Shared test harness via [ctestprobe](https://github.com/ocrosby/ctestprobe)
   from a sibling checkout — no vendored dependency, no submodule
 - CI runs each algorithm's suite with `-Wall -Wextra -Wpedantic`, plus a
@@ -134,7 +136,7 @@ export CFLAGS="-std=c11 -Wall -Wextra -Wpedantic -O1 -g \
   -fno-omit-frame-pointer"
 
 make -C ctestprobe clean lib
-for d in rle huffman shannon-fano lzw; do
+for d in rle huffman shannon-fano lzw lzss; do
   make -C compression/$d clean test
 done
 ```
@@ -145,11 +147,12 @@ and PR to `main` — see
 
 ## Roadmap
 
-Implemented: **rle**, **huffman**, **shannon-fano**, **lzw**.
+Implemented: **rle**, **huffman**, **shannon-fano**, **lzw**, **lzss**.
 
 Planned:
 
-- **lz77** — sliding-window dictionary coding
+- **lz77** — sliding-window dictionary coding (the LZSS predecessor,
+  emitting `(offset, length, next_char)` triples unconditionally)
 - **lz78** — explicit-dictionary variant
 - **arithmetic** — arithmetic coding
 - **bwt** — Burrows–Wheeler transform + move-to-front + entropy stage
