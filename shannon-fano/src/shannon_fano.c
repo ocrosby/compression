@@ -2,9 +2,12 @@
 
 #include <string.h>
 
+#include "bitstream.h"
+#include "hdr.h"
+
 #define MAX_SYMBOLS 256
 #define MAX_LEN     32
-#define HDR_BYTES   (8 + MAX_SYMBOLS)
+#define HDR_BYTES   (COMPRESSION_HDR_BYTES + MAX_SYMBOLS)
 
 /* Recursive top-down split: assign a code-length increment of 1 per level
  * and recurse into two groups of near-equal total frequency.
@@ -106,34 +109,22 @@ size_t shannon_fano_encode(const uint8_t *in, size_t in_len,
         return SHANNON_FANO_ERROR;
     }
 
-    size_t bits = 0;
-    for (size_t i = 0; i < in_len; i++) bits += length[in[i]];
-    size_t payload_bytes = (bits + 7) / 8;
-    size_t total = HDR_BYTES + payload_bytes;
-    if (total > out_cap) return SHANNON_FANO_ERROR;
+    if (out_cap < HDR_BYTES) return SHANNON_FANO_ERROR;
 
     uint32_t code[MAX_SYMBOLS];
     canonical_codes(length, code);
 
-    for (int i = 0; i < 8; i++) {
-        out[i] = (uint8_t)((in_len >> (i * 8)) & 0xFF);
-    }
-    memcpy(out + 8, length, MAX_SYMBOLS);
+    hdr_write_len(out, in_len);
+    memcpy(out + COMPRESSION_HDR_BYTES, length, MAX_SYMBOLS);
 
-    uint8_t *payload = out + HDR_BYTES;
-    memset(payload, 0, payload_bytes);
-    size_t bit_pos = 0;
+    bit_writer_t bw;
+    bit_writer_init(&bw, out + HDR_BYTES, out_cap - HDR_BYTES);
     for (size_t i = 0; i < in_len; i++) {
-        uint32_t c = code[in[i]];
-        uint8_t l = length[in[i]];
-        for (int b = l - 1; b >= 0; b--) {
-            if ((c >> b) & 1) {
-                payload[bit_pos / 8] |= (uint8_t)(1 << (7 - (bit_pos % 8)));
-            }
-            bit_pos++;
+        if (bit_writer_put(&bw, code[in[i]], length[in[i]]) != 0) {
+            return SHANNON_FANO_ERROR;
         }
     }
-    return total;
+    return HDR_BYTES + bit_writer_bytes(&bw);
 }
 
 size_t shannon_fano_decode(const uint8_t *in, size_t in_len,
@@ -141,13 +132,12 @@ size_t shannon_fano_decode(const uint8_t *in, size_t in_len,
     if (in_len == 0) return 0;
     if (in_len < HDR_BYTES) return SHANNON_FANO_ERROR;
 
-    size_t orig_len = 0;
-    for (int i = 0; i < 8; i++) orig_len |= (size_t)in[i] << (i * 8);
+    size_t orig_len = hdr_read_len(in);
     if (orig_len > out_cap) return SHANNON_FANO_ERROR;
     if (orig_len == 0) return 0;
 
     uint8_t length[MAX_SYMBOLS];
-    memcpy(length, in + 8, MAX_SYMBOLS);
+    memcpy(length, in + COMPRESSION_HDR_BYTES, MAX_SYMBOLS);
 
     uint8_t max_len = 0;
     for (int s = 0; s < MAX_SYMBOLS; s++) {
@@ -178,19 +168,17 @@ size_t shannon_fano_decode(const uint8_t *in, size_t in_len,
         if (length[s]) sorted[pos[length[s]]++] = (uint8_t)s;
     }
 
-    const uint8_t *payload = in + HDR_BYTES;
-    size_t payload_len = in_len - HDR_BYTES;
-    size_t bit_pos = 0;
+    bit_reader_t br;
+    bit_reader_init(&br, in + HDR_BYTES, in_len - HDR_BYTES);
     size_t out_pos = 0;
 
     while (out_pos < orig_len) {
         uint32_t acc = 0;
         int matched = 0;
         for (int len = 1; len <= max_len; len++) {
-            if (bit_pos >= payload_len * 8) return SHANNON_FANO_ERROR;
-            int bit = (payload[bit_pos / 8] >> (7 - (bit_pos % 8))) & 1;
-            bit_pos++;
-            acc = (acc << 1) | (uint32_t)bit;
+            uint32_t bit;
+            if (bit_reader_get(&br, 1, &bit) != 0) return SHANNON_FANO_ERROR;
+            acc = (acc << 1) | bit;
             if (count[len] > 0 &&
                 acc >= first_code[len] &&
                 acc < first_code[len] + count[len]) {

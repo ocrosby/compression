@@ -28,6 +28,10 @@ every algorithm directory ships a `README.md` explaining the concept.
 
 ```text
 compression/
+├── common/          # extracted helpers (bit-stream, length header)
+│   ├── src/
+│   ├── include/
+│   └── Makefile
 ├── <algorithm>/
 │   ├── src/
 │   ├── include/
@@ -36,6 +40,12 @@ compression/
 │   └── README.md    # concept, worked example, complexity, references
 └── README.md
 ```
+
+The `common/` library holds the small helpers shared by three or more
+algorithms — currently the 8-byte length header (used by `huffman/`,
+`shannon-fano/`, `lzw/`, `lzss/`) and the MSB-first bit stream (used
+by `huffman/`, `shannon-fano/`, `lzw/`). Anything shared by only two
+consumers stays duplicated per the policy in `CLAUDE.md`.
 
 ## Features
 
@@ -136,6 +146,7 @@ export CFLAGS="-std=c11 -Wall -Wextra -Wpedantic -O1 -g \
   -fno-omit-frame-pointer"
 
 make -C ctestprobe clean lib
+make -C compression/common clean lib
 for d in rle huffman shannon-fano lzw lzss; do
   make -C compression/$d clean test
 done
